@@ -1,0 +1,42 @@
+<!-- 此页面仅用于临时测试使用！ -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+
+<body>
+
+<input type="button" onclick="AjaxSubmit();" value="提交">
+
+
+<script type="text/javascript" src="/static/js/jquery-1.11.0.js"></script>
+
+<script>
+    function AjaxSubmit(){
+        //var names = [{'name':'chenchao','age':18}, {'name':'lisi','age':19}, {'name':'wangwu','age':13}];
+        var names1 = ['小明', '小红', '晓东'];
+        var names2 = ['小明2', '小红2', '晓东2'];
+        $.ajax({
+            url:"/test/",
+            type:'POST',
+            data:{names456:names2},
+            success: function (arg) {    //如果程序执行成功就会执行这里的函数
+                //var callback_dic = $.parseJSON(arg);
+
+                if(arg.status){
+                    alert('成功');
+                }else{
+                    alert(arg.error); //把错误的信息从后台提出展示出来
+                }
+            }
+
+        });
+    }
+</script>
+
+</body>
+
+</html>

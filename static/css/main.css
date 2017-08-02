@@ -1,0 +1,26 @@
+    #daohang ul {
+        list-style: none;
+        margin: 0px;
+        padding: 0px;
+        text-align: center;
+    }
+    #daohang ul li{
+        float:left;
+        padding: 0px 0px;
+        line-height: 40px;
+    }
+    a{
+        text-decoration: none;
+        font-size: 20px;
+    }
+    a:hover{
+        background: none;
+        color: #ffe82b;
+    }
+
+
+    .tabstyle table tr td {
+    background-color: #ECF5FA;
+    height: 25px;
+    font-size: 12px;
+}

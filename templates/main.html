@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>用电量预测官方网站</title>
+
+    <script type="text/javascript" src="/static/js/jquery-1.11.0.js"></script>
+    <link rel="stylesheet" href="/static/css/main.css">
+
+     <link rel="stylesheet" type="text/css" href="/static/jquery-easyui-1.3.3/themes/default/easyui.css">
+     <link rel="stylesheet" type="text/css" href="/static/jquery-easyui-1.3.3/themes/icon.css">
+	 <link rel="stylesheet" type="text/css" href="/static/jquery-easyui-1.3.3/demo/demo.css">
+     <script type="text/javascript" src="/static/jquery-easyui-1.3.3/jquery.min.js"></script>
+	 <script type="text/javascript" src="/static/jquery-easyui-1.3.3/jquery.easyui.min.js"></script>
+     <script type="text/javascript" src="/static/jquery-easyui-1.3.3/locale/easyui-lang-zh_CN.js"></script>
+
+
+
+{% csrf_token %}
+<script type="text/javascript">
+
+        // using jQuery
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+    }
+
+    function loadName(){
+        var csrftoken = getCookie('csrftoken');
+		var xmlHttp;
+		if(window.XMLHttpRequest){
+			xmlHttp=new XMLHttpRequest();
+		}else{
+			xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
+		}
+		xmlHttp.onreadystatechange=function(){
+			if(xmlHttp.readyState==4 && xmlHttp.status==200){
+				document.getElementById("name").value=xmlHttp.responseText;
+				var reText=xmlHttp.responseText;
+				alert(reText);
+			}
+		};
+		xmlHttp.open("post","/ajax/",true);
+		xmlHttp.setRequestHeader('X-CSRFToken',csrftoken);
+		xmlHttp.send();
+	}
+
+    </script>
+
+</head>
+
+
+
+<body>
+<div id="top" style="border:none;height: 70px;width: 100%;">
+             <img src="/static/image/No1.jpg" width="100%">
+</div>
+
+<div id="daohang" style="border:solid 0px blue;height: 40px;width: 100%;background: #5288ff">
+    <ul>
+        <li>
+            <div id="menu" style="border:none;height: 40px;width: 80px;background: #5288ff">
+            <a href="#">首页</a>
+            </div>
+        </li>
+         <li>
+            <div style="border:none;height: 40px;width: 100px;background: #5288ff">
+                    <a href="#">所有用户</a>
+            </div>
+        </li>
+         <li>
+            <div style="border:none;height: 40px;width: 100px;background: #5288ff">
+                    <a href="#">电量预测</a>
+            </div>
+        </li>
+         <li>
+            <div style="border:none;height: 40px;width: 80px;background: #5288ff">
+            <a href="#">关于我</a>
+            </div>
+        </li>
+    </ul>
+</div>
+
+
+
+
+<div id="ajax" style="border:1px blue;width:100%;height:150px;background: greenyellow" >
+    <input type="button" id="ajax" onclick="loadName()" value="ajax提交" /><br>
+    <input type="text" id="name" value="{{ yname }}" />
+</div>
+
+
+ <div class="tabstyle">
+
+     <form id="designForm" action="#" method="post">
+         {% csrf_token %}
+         <!-- 时间校对，输入两个校对的时间段 -->
+         <table width="100%" id="date" border="0px" align="right">
+
+             <tr>
+                 <td width="78%">
+                     <input type="text" id="starDate" name="starDate" />
+                     <input type="text" id="endDate" name="endDate" />
+                 </td>
+                 <td width="4%"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                     <font style="font-size: 15px">校对的时间:</font>
+                 </span></td>
+                 <td width="10%"><input id="db"/></td>
+                 <td width="2%"><span>&nbsp;&nbsp;<font style="font-size: 30px">→</font>&nbsp;&nbsp; </span></td>
+                 <td width="10%"><input id="db2"/></td>
+             </tr>
+              <tr>
+                 <td width="56%"></td>
+                 <td width="14%"><span> <font style="font-size: 15px">
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                     您选择的日</font></span></td>
+                  <td width="10%">
+                      <font style="font-size: 15px">期是从:</font>
+                      <font style="size: 20px;color: red;"><span id="result"></span></font>
+
+                  </td>
+                  <td width="10%"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font style="font-size: 15px">至: </font></span></td>
+                  <td width="10%"><font style="font-size: 20px;color: red;"><span id="result2"></span></font></td>
+             </tr>
+         </table>
+
+
+
+                <table width="100%" id="list" border="0" cellpadding="0"
+                    cellspacing="1" width="100%" align="center"
+                    style="background-color: #A2D5F0;">
+                    <tr>
+                        <td align="center" width="40%">
+                            统计待显示数据：&nbsp;&nbsp;
+                        </td>
+                        <td colspan="3" width="60%" align="center" height="250">
+
+                            <table width="100%" id="list" border="0" cellpadding="0"
+                                cellspacing="0" width="100%" align="center"
+                                style="background-color: #A2D5F0;">
+                                <tr>
+                                    <td width="5%">志伟
+                                    </td>
+                                    <td width="30%" align="right" height="250">
+                                        <select id="fb_list" name="box_select" multiple="multiple" size="15"
+                                            　style="width: 250px;">
+                                            <option value="userA">
+                                                用户
+                                            </option>
+                                            <option value="userB">
+                                                用户b
+                                            </option>
+                                            <option value="userC">
+                                                用户c
+                                            </option>
+                                            <option value="userD">
+                                                用户d
+                                            </option>
+                                            <option value="userF">
+                                                用户f
+                                            </option>
+                                            <option value="userG">
+                                                用户g
+                                            </option>
+                                            <option value="userH">
+                                                用户h
+                                            </option>
+                                            <option value="userI">
+                                                用户i
+                                            </option>
+                                             <option value="userJ">
+                                                用户j
+                                            </option>
+                                            <option value="userK">
+                                                用户k
+                                            </option>
+
+                                            <option value="userL">
+                                                用户L
+                                            </option>
+                                            <option value="userM">
+                                                用户m
+                                            </option>
+                                            <option value="userN">
+                                                用户n
+                                            </option>
+                                            <option value="userO">
+                                                用户o
+                                            </option>
+                                            <option value="userP">
+                                                用户p
+                                            </option>
+                                            <option value="userQ">
+                                                用户q
+                                            </option>
+                                            <option value="userR">
+                                                用户r
+                                            </option>
+                                            <option value="userS">
+                                                用户s
+                                            </option>
+                                             <option value="userT">
+                                                用户t
+                                            </option>
+
+
+                                        </select>
+                                        &nbsp;&nbsp;
+                                    </td>
+                                    <td align="center" width="5%">
+                                        <input type="button" id="add" value="添加>>" />
+                                        <br />
+                                        <br />
+                                        <input type="button" id="delete" value="<<删除" />
+                                    </td>
+                                    <td width="20%" align="left">
+                                        &nbsp;&nbsp;
+                                        <select id="select_list" name="select_list" multiple="multiple" size="15"
+                                            style="width: 150px;">
+                                        </select>
+                                    </td>
+
+                                    <td width="30%">
+                                        <div class="easyui-calendar" style="width:180px;height:180px;"></div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+
+                    </tr>
+                    <tr align="center">
+                        <td colspan="5" align="right" vAlign=middle>
+                            <input type="hidden" value="" id="selectName"/>
+                            <input type="submit" id="submitform" value="提 交" class="daochu"
+                                onclick="return checkSubmit();" />
+                            <input type="button" value="返 回" onClick="history.Go(-1);"
+                                class="daochu">
+                        </td>
+                    </tr>
+
+
+     <script>
+
+                var a;
+
+                $(function(){
+                　　$("#add").click(function(){
+                　　　　　　　if($("#fb_list option:selected").length>0)
+                　　　　　　　{
+                　　　　　　　　　　　$("#fb_list option:selected").each(function(){
+                　　　　　　　　　　　　　　$("#select_list").append("<option value='"+$(this).val()+"'>"+$(this).text()+"</option");
+                 　　　　　　　　　　　　　 $(this).remove();　
+                                          //把选择的移除左边的框，加到右边的框
+                　　　　　　　　　　　})
+                　　　　　　　}
+                　　　　　　　else
+                　　　　　　　{
+                　　　　　　　　　　　alert("请选择要添加的显示数据项！");
+                　　　　　　　}
+                　　　})
+                })
+                $(function(){
+                　　　　　　$("#delete").click(function(){
+                　　　　　　　　　　　if($("#select_list option:selected").length>0)
+                　　　　　　　　　　　{
+                　　　　　　　　　　　　　　　$("#select_list option:selected").each(function(){
+                　　　　　　　　　　　　　　　　　　　　　$("#fb_list").append("<option value='"+$(this).val()+"'>"+$(this).text()+"</option");
+                　　　　　　　　　　　　　　　　　　　　　$(this).remove();　
+                　　　　　　　　　　　　　　　})
+                　　　　　　　　　　　}
+                　　　　　　　　　　　else
+                　　　　　　　　　　　{
+                　　　　　　　　　　　　　　　alert("请选择要删除的数据项！");
+                　　　　　　　　　　　}
+                　　　　　})
+                })
+                $(function(){
+                　　　　　　$("#submitform").click(function(){
+
+                　　　　　　　　　　　if($("#select_list option").length>0)
+                　　　　　　　　　　　{
+                　　　　　　　　　　　　　　　$("#select_list option").each(function(){
+                　　　　　　　　　　　　　　　　　a= $("#selectName").val($("#selectName").val()+","+$(this).val());
+                　　　　　　　　　　　　　
+                               　　})
+                                    alert(a.val());
+                　　　　　　　　　　　}
+                　　　　　　　　　　　else
+                　　　　　　　　　　　{
+                　　　　　　　　　　　　　　　alert("请选择要添加的显示数据项！");
+                                        return false;
+                　　　　　　　　　　　}
+                                  $("#selectName").val($("#selectName").val().substr(1));
+                　　　　　})
+                })
+                //双击实现左右移动
+                $("#select_list").dblclick(function(){
+                     var alloptions = $("#select_list option");
+                     var so = $("#select_list option:selected");
+
+                     so.get(so.length-1).index == alloptions.length-1?so.prev().attr("selected",true):so.next().attr("selected",true);
+
+                     $("#fb_list").append(so);
+                   });
+
+                   $("#fb_list").dblclick(function(){
+                     var alloptions = $("#fb_list option");
+                     var so = $("#fb_list option:selected");
+
+                     so.get(so.length-1).index == alloptions.length-1?so.prev().attr("selected",true):so.next().attr("selected",true);
+
+                     $("#select_list").append(so);
+                   });
+
+                function checkSubmit() {
+                    alert(a.val())
+                    return false;
+                  }
+
+        //日期小控件
+        $(function () {
+            var db = $('#db');
+            db.datebox({
+                onShowPanel: function () {//显示日趋选择对象后再触发弹出月份层的事件，初始化时没有生成月份层
+                    span.trigger('click'); //触发click事件弹出月份层
+                    if (!tds) setTimeout(function () {//延时触发获取月份对象，因为上面的事件触发和对象生成有时间间隔
+                        tds = p.find('div.calendar-menu-month-inner td');
+                        tds.click(function (e) {
+                            e.stopPropagation(); //禁止冒泡执行easyui给月份绑定的事件
+                            var year = /\d{4}/.exec(span.html())[0]//得到年份
+                            , month = parseInt($(this).attr('abbr'), 10); //月份，这里不需要+1
+                            db.datebox('hidePanel')//隐藏日期对象
+                            .datebox('setValue', year + '-' + month); //设置日期的值
+
+                             $('#result').text(year+'年'+month+'月');//+date.getDate());
+                             $('#starDate').val(year+month);
+
+                        });
+                    }, 0);
+                    yearIpt.unbind();//解绑年份输入框中任何事件
+                },
+                parser: function (s) {
+                    if (!s) return new Date();
+                    var arr = s.split('-');
+                    return new Date(parseInt(arr[0], 10), parseInt(arr[1], 10) - 1, 1);
+                },
+                formatter: function (d) { return d.getFullYear() + '-' + (d.getMonth() + 1);/*getMonth返回的是0开始的，忘记了。。已修正*/ }
+            });
+            var p = db.datebox('panel'), //日期选择对象
+                tds = false, //日期选择对象中月份
+                aToday = p.find('a.datebox-current'),
+                yearIpt = p.find('input.calendar-menu-year'),//年份输入框
+                //显示月份层的触发控件
+                span = aToday.length ? p.find('div.calendar-title span') ://1.3.x版本
+                p.find('span.calendar-text'); //1.4.x版本
+            if (aToday.length) {//1.3.x版本，取消Today按钮的click事件，重新绑定新事件设置日期框为今天，防止弹出日期选择面板
+
+                aToday.unbind('click').click(function () {
+                    var now=new Date();
+                    db.datebox('hidePanel').datebox('setValue', now.getFullYear() + '-' + (now.getMonth() + 1));
+                });
+            }
+        });
+
+            $(function () {
+            var db = $('#db2');
+            db.datebox({
+                onShowPanel: function () {//显示日趋选择对象后再触发弹出月份层的事件，初始化时没有生成月份层
+                    span.trigger('click'); //触发click事件弹出月份层
+                    if (!tds) setTimeout(function () {//延时触发获取月份对象，因为上面的事件触发和对象生成有时间间隔
+                        tds = p.find('div.calendar-menu-month-inner td');
+                        tds.click(function (e) {
+                            e.stopPropagation(); //禁止冒泡执行easyui给月份绑定的事件
+                            var year = /\d{4}/.exec(span.html())[0]//得到年份
+                            , month = parseInt($(this).attr('abbr'), 10); //月份，这里不需要+1
+                            db.datebox('hidePanel')//隐藏日期对象
+                            .datebox('setValue', year + '-' + month); //设置日期的值
+
+                             $('#result2').text(year+'年'+month+'月');//+date.getDate());
+                             $('#endDate').val(year+month);
+
+                        });
+                    }, 0);
+                    yearIpt.unbind();//解绑年份输入框中任何事件
+                },
+                parser: function (s) {
+                    if (!s) return new Date();
+                    var arr = s.split('-');
+                    return new Date(parseInt(arr[0], 10), parseInt(arr[1], 10) - 1, 1);
+                },
+                formatter: function (d) { return d.getFullYear() + '-' + (d.getMonth() + 1);/*getMonth返回的是0开始的，忘记了。。已修正*/ }
+            });
+            var p = db.datebox('panel'), //日期选择对象
+                tds = false, //日期选择对象中月份
+                aToday = p.find('a.datebox-current'),
+                yearIpt = p.find('input.calendar-menu-year'),//年份输入框
+                //显示月份层的触发控件
+                span = aToday.length ? p.find('div.calendar-title span') ://1.3.x版本
+                p.find('span.calendar-text'); //1.4.x版本
+            if (aToday.length) {//1.3.x版本，取消Today按钮的click事件，重新绑定新事件设置日期框为今天，防止弹出日期选择面板
+
+                aToday.unbind('click').click(function () {
+                    var now=new Date();
+                    db.datebox('hidePanel').datebox('setValue', now.getFullYear() + '-' + (now.getMonth() + 1));
+                });
+            }
+        });
+
+
+      </script>
+                </table>
+                </form>
+
+</div>
+
+
+
+
+{% csrf_token %}
+</body>
+</html>
